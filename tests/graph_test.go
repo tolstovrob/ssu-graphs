@@ -123,3 +123,76 @@ func TestWithEdgeWeight(t *testing.T) {
 		t.Errorf("WithEdgeWeight option failed, expected 99, got %d", edge.Weight)
 	}
 }
+
+func TestMakeGraphWithOptions(t *testing.T) {
+	nodes := []*graph.Node{
+		graph.MakeNode(1),
+		graph.MakeNode(2, graph.WithNodeLabel("Node2")),
+	}
+
+	edges := []*graph.Edge{
+		graph.MakeEdge(1, 1, 2),
+		graph.MakeEdge(
+			2,
+			2,
+			1,
+			graph.WithEdgeWeight(10),
+			graph.WithEdgeLabel("Back"),
+		),
+	}
+
+	options := graph.TOptions{IsMulti: true, IsDirected: true}
+
+	gr := graph.MakeGraph(
+		graph.WithGraphNodes(nodes),
+		graph.WithGraphEdges(edges),
+		graph.WithGraphOptions(options),
+	)
+
+	if len(gr.Nodes) != 2 {
+		t.Errorf("expected 2 nodes, got %d", len(gr.Nodes))
+	}
+
+	if len(gr.Edges) != 2 {
+		t.Errorf("expected 2 edges, got %d", len(gr.Edges))
+	}
+
+	if !gr.Options.IsMulti {
+		t.Errorf("expected IsMulti true, got false")
+	}
+
+	if !gr.Options.IsDirected {
+		t.Errorf("expected IsDirected true, got false")
+	}
+}
+
+func TestUpdateGraphOptions(t *testing.T) {
+	gr := graph.MakeGraph()
+
+	gr.UpdateGraph(graph.WithGraphMulti(true))
+	if !gr.Options.IsMulti {
+		t.Errorf("expected IsMulti true after update, got false")
+	}
+
+	gr.UpdateGraph(graph.WithGraphDirected(true))
+	if !gr.Options.IsDirected {
+		t.Errorf("expected IsDirected true after update, got false")
+	}
+}
+
+func TestUpdateGraphNodesEdges(t *testing.T) {
+	node := graph.MakeNode(5)
+	edge := graph.MakeEdge(7, 5, 5)
+
+	gr := graph.MakeGraph()
+
+	gr.UpdateGraph(graph.WithGraphNodes([]*graph.Node{node}))
+	if len(gr.Nodes) != 1 || gr.Nodes[0].Key != 5 {
+		t.Errorf("expected 1 node with key 5, got %v", gr.Nodes)
+	}
+
+	gr.UpdateGraph(graph.WithGraphEdges([]*graph.Edge{edge}))
+	if len(gr.Edges) != 1 || gr.Edges[0].Key != 7 {
+		t.Errorf("expected 1 edge with key 7, got %v", gr.Edges)
+	}
+}

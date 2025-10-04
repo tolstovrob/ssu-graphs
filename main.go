@@ -24,4 +24,8 @@ func main() {
 
 	edge.UpdateEdge(graph.WithEdgeLabel("Zalupa"), graph.WithEdgeWeight(5))
 	fmt.Printf("Rename edge %v with %v. Weight it as %v\n", edge.Key, edge.Label, edge.Weight)
+
+	gr := graph.Graph{}
+	dgr := graph.MakeGraph(graph.WithGraphDirected(true))
+	fmt.Printf("First graph is directed: %v, and second is directed: %v\n", gr.Options.IsDirected, dgr.Options.IsDirected)
 }

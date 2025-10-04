@@ -106,3 +106,84 @@ func WithEdgeLabel(label string) Option[Edge] {
 		edge.Label = label
 	}
 }
+
+/*
+ * Graph struct.
+ *
+ * First of all, we got TOptions struct, which represents all possible graph
+ * configuration. Now, it only has IsMulti and IsDirected for multigraphs and
+ * Directed graphs respectively, but it is easily scalable for other options
+ * if neccessary.
+ *
+ * Graph struct sa it is contains Nodes and Edges lists of Node and Edge
+ * pointers respectively, and Options configuration of TOptions.
+ *
+ * Graph represented via adjacency list of edges. But it also possible to have
+ * islands with no connections. You cannot find them in Edges, but in the Nodes.
+ *
+ * You actually can use default constructor with this one. It will build
+ * non-multi undirected graph:
+ *
+ * gr := Graph{}
+ *
+ * But to make graph properly, use constructor with options:
+ *
+ * gr := MakeGraph(WithGraphMulti(true), WithGraphDirected(false))
+ *
+ * I.e., code above will create undirected multigraph.
+ */
+
+type TOptions struct {
+	IsMulti    bool `json:"isMulti"`
+	IsDirected bool `json:"IsDirected"`
+}
+
+type Graph struct {
+	Nodes   []*Node  `json:"nodes"`
+	Edges   []*Edge  `json:"edges"`
+	Options TOptions `json:"options"`
+}
+
+func MakeGraph(options ...Option[Graph]) *Graph {
+	gr := &Graph{}
+	for _, opt := range options {
+		opt(gr)
+	}
+	return gr
+}
+
+func (gr *Graph) UpdateGraph(options ...Option[Graph]) {
+	for _, opt := range options {
+		opt(gr)
+	}
+}
+
+func WithGraphNodes(nodes []*Node) Option[Graph] {
+	return func(gr *Graph) {
+		gr.Nodes = nodes
+	}
+}
+
+func WithGraphEdges(edges []*Edge) Option[Graph] {
+	return func(gr *Graph) {
+		gr.Edges = edges
+	}
+}
+
+func WithGraphOptions(options TOptions) Option[Graph] {
+	return func(gr *Graph) {
+		gr.Options = options
+	}
+}
+
+func WithGraphMulti(isMulti bool) Option[Graph] {
+	return func(gr *Graph) {
+		gr.Options.IsMulti = isMulti
+	}
+}
+
+func WithGraphDirected(IsDirected bool) Option[Graph] {
+	return func(gr *Graph) {
+		gr.Options.IsDirected = IsDirected
+	}
+}
