@@ -15,6 +15,13 @@ func main() {
 	node.UpdateNode(graph.WithNodeLabel("Fimoz"))
 	fmt.Printf("Updated label for node with key %v: %v\n", node.Key, node.Label)
 
-	labeledNode := graph.MakeNode(1, graph.WithNodeLabel("Aboba"))
+	labeledNode := graph.MakeNode(2, graph.WithNodeLabel("Aboba"))
 	fmt.Printf("Created node with key %v and label %v\n", labeledNode.Key, labeledNode.Label)
+
+	edge := graph.MakeEdge(1, node.Key, labeledNode.Key)
+	fmt.Printf("Connected %v with %v. Connection key: %v\n", node.Key, labeledNode.Key, edge.Key)
+	fmt.Printf("Label edge %v with %v. Weight it as %v\n", edge.Key, edge.Label, edge.Weight)
+
+	edge.UpdateEdge(graph.WithEdgeLabel("Zalupa"), graph.WithEdgeWeight(5))
+	fmt.Printf("Rename edge %v with %v. Weight it as %v\n", edge.Key, edge.Label, edge.Weight)
 }
