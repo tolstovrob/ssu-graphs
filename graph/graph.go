@@ -15,7 +15,7 @@ type TWeight uint64 // Weight type. Can be replaced with any COMPARABLE type
 
 /*
  * Node struct represents graph node. It has a unique key and optional label.
- * You can properly construct this via this:
+ * You can properly construct Node via this:
  *
  * node := MakeNode(1)
  *
