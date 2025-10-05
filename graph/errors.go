@@ -17,3 +17,7 @@ func ThrowEdgeWithKeyExists(key TKey) error {
 func ThrowEdgeWithKeyNotExists(key TKey) error {
 	return fmt.Errorf("Edge with key %v not exists", key)
 }
+
+func ThrowSameEdgeNotAllowedInMulti(src, dst TKey) error {
+	return fmt.Errorf("Edge with src: %v and dst: %v already exists", src, dst)
+}

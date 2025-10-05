@@ -8,7 +8,9 @@
 
 package graph
 
-import "slices"
+import (
+	"slices"
+)
 
 type Option[T any] func(*T) // Type representing functional options pattern
 
@@ -238,9 +240,21 @@ func (gr *Graph) GetEdgeByKey(key TKey) *Edge {
 	return nil
 }
 
+/*
+ * NOW WARNING! User need to check whether graph is directed or not before
+ * adding edge.
+ */
+
 func (gr *Graph) AddEdge(edge *Edge) error {
 	if gr.GetEdgeByKey(edge.Key) != nil {
 		return ThrowEdgeWithKeyExists(edge.Key)
+	}
+
+	if !gr.Options.IsMulti && slices.ContainsFunc(gr.Edges,
+		func(e *Edge) bool {
+			return e.Source == edge.Source && e.Destination == edge.Destination
+		}) {
+		return ThrowSameEdgeNotAllowedInMulti(edge.Source, edge.Destination)
 	}
 
 	gr.Edges = append(gr.Edges, edge)
