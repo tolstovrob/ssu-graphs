@@ -8,6 +8,8 @@
 
 package graph
 
+import "slices"
+
 type Option[T any] func(*T) // Type representing functional options pattern
 
 type TKey uint64    // Key type. Can be replaced with any UNIQUE type
@@ -186,4 +188,73 @@ func WithGraphDirected(IsDirected bool) Option[Graph] {
 	return func(gr *Graph) {
 		gr.Options.IsDirected = IsDirected
 	}
+}
+
+/*
+ * Next coming finding, adding and removing handlers for nodes and edges. I put
+ * them apart main Graph struct because they contain both node and edges and
+ * graph. All of them will throw an error if the operation is not allowed (I.e.
+ * adding existing node or connecting nodes with more then one time in multi).
+ */
+
+func (gr *Graph) GetNodeByKey(key TKey) *Node {
+	for _, node := range gr.Nodes {
+		if node.Key == key {
+			return node
+		}
+	}
+
+	return nil
+}
+
+func (gr *Graph) AddNode(node *Node) error {
+	if gr.GetNodeByKey(node.Key) != nil {
+		return ThrowNodeWithKeyExists(node.Key)
+	}
+
+	gr.Nodes = append(gr.Nodes, node)
+	return nil
+}
+
+func (gr *Graph) RemoveNodeByKey(key TKey) error {
+	if gr.GetNodeByKey(key) == nil {
+		return ThrowNodeWithKeyNotExists(key)
+	}
+
+	gr.Nodes = slices.DeleteFunc(gr.Nodes, func(n *Node) bool {
+		return n.Key == key
+	})
+
+	return nil
+}
+
+func (gr *Graph) GetEdgeByKey(key TKey) *Edge {
+	for _, edge := range gr.Edges {
+		if edge.Key == key {
+			return edge
+		}
+	}
+
+	return nil
+}
+
+func (gr *Graph) AddEdge(edge *Edge) error {
+	if gr.GetEdgeByKey(edge.Key) != nil {
+		return ThrowEdgeWithKeyExists(edge.Key)
+	}
+
+	gr.Edges = append(gr.Edges, edge)
+	return nil
+}
+
+func (gr *Graph) RemoveEdgeByKey(key TKey) error {
+	if gr.GetEdgeByKey(key) == nil {
+		return ThrowEdgeWithKeyNotExists(key)
+	}
+
+	gr.Edges = slices.DeleteFunc(gr.Edges, func(e *Edge) bool {
+		return e.Key == key
+	})
+
+	return nil
 }

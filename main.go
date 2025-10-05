@@ -28,4 +28,12 @@ func main() {
 	gr := graph.Graph{}
 	dgr := graph.MakeGraph(graph.WithGraphDirected(true))
 	fmt.Printf("First graph is directed: %v, and second is directed: %v\n", gr.Options.IsDirected, dgr.Options.IsDirected)
+
+	gr.AddNode(node)
+	err := gr.AddNode(labeledNode)
+	fmt.Printf("%v\n", err)
+
+	gr.AddNode(labeledNode)
+	gr.AddEdge(graph.MakeEdge(1, 1, 2, graph.WithEdgeLabel("Aboba")))
+	fmt.Printf("%v->%v\n", gr.GetNodeByKey(gr.GetEdgeByKey(1).Source).Label, gr.GetNodeByKey(gr.GetEdgeByKey(1).Destination).Label)
 }
