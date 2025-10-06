@@ -1,4 +1,4 @@
-package tests
+package graph_test
 
 import (
 	"testing"
@@ -7,192 +7,123 @@ import (
 )
 
 func TestMakeNode(t *testing.T) {
-	node := graph.MakeNode(123)
-	if node.Key != 123 {
-		t.Errorf("expected key 123, got %d", node.Key)
+	node := graph.MakeNode(1)
+	if node.Key != 1 {
+		t.Errorf("Expected node key to be 1, got %d", node.Key)
 	}
-	if node.Label != "" {
-		t.Errorf("expected empty label, got %s", node.Label)
-	}
+}
 
-	labeledNode := graph.MakeNode(
-		456,
-		graph.WithNodeLabel("TestLabel"),
-	)
-	if labeledNode.Key != 456 {
-		t.Errorf("expected key 456, got %d", labeledNode.Key)
-	}
-	if labeledNode.Label != "TestLabel" {
-		t.Errorf("expected label 'TestLabel', got %s", labeledNode.Label)
+func TestMakeNodeWithLabel(t *testing.T) {
+	label := "Aboba"
+	node := graph.MakeNode(2, graph.WithNodeLabel(label))
+	if node.Label != label {
+		t.Errorf("Expected label %s, got %s", label, node.Label)
 	}
 }
 
 func TestUpdateNode(t *testing.T) {
-	node := graph.MakeNode(789)
-
-	node.UpdateNode(graph.WithNodeLabel("UpdatedLabel"))
-	if node.Label != "UpdatedLabel" {
-		t.Errorf("expected updated label 'UpdatedLabel', got %s", node.Label)
-	}
-
-	node.UpdateNode(graph.WithNodeLabel(""))
-	if node.Label != "" {
-		t.Errorf("expected empty label after update, got %s", node.Label)
-	}
-}
-
-func TestWithNodeLabel(t *testing.T) {
-	node := graph.MakeNode(1)
-	opt := graph.WithNodeLabel("LabelForTest")
-	opt(node)
-	if node.Label != "LabelForTest" {
-		t.Errorf("WithNodeLabel option failed, expected 'LabelForTest', got %s", node.Label)
+	node := graph.MakeNode(3)
+	newLabel := "New Label"
+	node.UpdateNode(graph.WithNodeLabel(newLabel))
+	if node.Label != newLabel {
+		t.Errorf("Expected label to be updated to %s, got %s", newLabel, node.Label)
 	}
 }
 
 func TestMakeEdge(t *testing.T) {
-	srcKey := graph.TKey(1)
-	dstKey := graph.TKey(2)
+	src := graph.MakeNode(1)
+	dst := graph.MakeNode(2)
+	edge := graph.MakeEdge(1, src.Key, dst.Key)
+	if edge.Key != 1 || edge.Source != src.Key || edge.Destination != dst.Key {
+		t.Errorf("Edge fields do not match expected values")
+	}
+}
 
-	edge := graph.MakeEdge(100, srcKey, dstKey)
-	if edge.Key != 100 {
-		t.Errorf("expected key 100, got %d", edge.Key)
+func TestMakeEdgeWithOptions(t *testing.T) {
+	src := graph.MakeNode(1)
+	dst := graph.MakeNode(2)
+	weight := graph.TWeight(69)
+	label := "Path"
+	edge := graph.MakeEdge(2, src.Key, dst.Key, graph.WithEdgeWeight(weight), graph.WithEdgeLabel(label))
+	if edge.Weight != weight {
+		t.Errorf("Expected weight %d, got %d", weight, edge.Weight)
 	}
-	if edge.Source != srcKey {
-		t.Errorf("expected source %d, got %d", srcKey, edge.Source)
-	}
-	if edge.Destination != dstKey {
-		t.Errorf("expected destination %d, got %d", dstKey, edge.Destination)
-	}
-	if edge.Weight != 0 {
-		t.Errorf("expected default weight 0, got %d", edge.Weight)
-	}
-	if edge.Label != "" {
-		t.Errorf("expected empty label, got %s", edge.Label)
-	}
-
-	edgeWithOpts := graph.MakeEdge(
-		200,
-		srcKey,
-		dstKey,
-		graph.WithEdgeLabel("Highway"),
-		graph.WithEdgeWeight(42),
-	)
-	if edgeWithOpts.Label != "Highway" {
-		t.Errorf("expected label 'Highway', got %s", edgeWithOpts.Label)
-	}
-	if edgeWithOpts.Weight != 42 {
-		t.Errorf("expected weight 42, got %d", edgeWithOpts.Weight)
+	if edge.Label != label {
+		t.Errorf("Expected label %s, got %s", label, edge.Label)
 	}
 }
 
 func TestUpdateEdge(t *testing.T) {
-	edge := graph.MakeEdge(300, 3, 4)
-
-	edge.UpdateEdge(graph.WithEdgeLabel("Street"), graph.WithEdgeWeight(24))
-	if edge.Label != "Street" {
-		t.Errorf("expected label 'Street', got %s", edge.Label)
-	}
-	if edge.Weight != 24 {
-		t.Errorf("expected weight 24, got %d", edge.Weight)
-	}
-
-	edge.UpdateEdge(graph.WithEdgeLabel(""), graph.WithEdgeWeight(0))
-	if edge.Label != "" {
-		t.Errorf("expected empty label, got %s", edge.Label)
-	}
-	if edge.Weight != 0 {
-		t.Errorf("expected weight 0, got %d", edge.Weight)
-	}
-}
-
-func TestWithEdgeLabel(t *testing.T) {
 	edge := graph.MakeEdge(1, 1, 2)
-	opt := graph.WithEdgeLabel("MainRoad")
-	opt(edge)
-	if edge.Label != "MainRoad" {
-		t.Errorf("WithEdgeLabel option failed, expected 'MainRoad', got %s", edge.Label)
+	newWeight := graph.TWeight(100)
+	edge.UpdateEdge(graph.WithEdgeWeight(newWeight))
+	if edge.Weight != newWeight {
+		t.Errorf("Expected weight to be updated to %d, got %d", newWeight, edge.Weight)
 	}
 }
 
-func TestWithEdgeWeight(t *testing.T) {
-	edge := graph.MakeEdge(1, 1, 2)
-	opt := graph.WithEdgeWeight(99)
-	opt(edge)
-	if edge.Weight != 99 {
-		t.Errorf("WithEdgeWeight option failed, expected 99, got %d", edge.Weight)
-	}
-}
-
-func TestMakeGraphWithOptions(t *testing.T) {
-	nodes := []*graph.Node{
-		graph.MakeNode(1),
-		graph.MakeNode(2, graph.WithNodeLabel("Node2")),
-	}
-
-	edges := []*graph.Edge{
-		graph.MakeEdge(1, 1, 2),
-		graph.MakeEdge(
-			2,
-			2,
-			1,
-			graph.WithEdgeWeight(10),
-			graph.WithEdgeLabel("Back"),
-		),
-	}
-
-	options := graph.TOptions{IsMulti: true, IsDirected: true}
-
-	gr := graph.MakeGraph(
-		graph.WithGraphNodes(nodes),
-		graph.WithGraphEdges(edges),
-		graph.WithGraphOptions(options),
-	)
-
-	if len(gr.Nodes) != 2 {
-		t.Errorf("expected 2 nodes, got %d", len(gr.Nodes))
-	}
-
-	if len(gr.Edges) != 2 {
-		t.Errorf("expected 2 edges, got %d", len(gr.Edges))
-	}
-
-	if !gr.Options.IsMulti {
-		t.Errorf("expected IsMulti true, got false")
-	}
-
-	if !gr.Options.IsDirected {
-		t.Errorf("expected IsDirected true, got false")
-	}
-}
-
-func TestUpdateGraphOptions(t *testing.T) {
+func TestAddGetRemoveNode(t *testing.T) {
 	gr := graph.MakeGraph()
-
-	gr.UpdateGraph(graph.WithGraphMulti(true))
-	if !gr.Options.IsMulti {
-		t.Errorf("expected IsMulti true after update, got false")
+	node := graph.MakeNode(1)
+	if err := gr.AddNode(node); err != nil {
+		t.Errorf("Failed to add node: %v", err)
 	}
-
-	gr.UpdateGraph(graph.WithGraphDirected(true))
-	if !gr.Options.IsDirected {
-		t.Errorf("expected IsDirected true after update, got false")
+	n, err := gr.GetNodeByKey(node.Key)
+	if err != nil || n == nil {
+		t.Errorf("Failed to get node: %v", err)
+	}
+	if err := gr.RemoveNodeByKey(node.Key); err != nil {
+		t.Errorf("Failed to remove node: %v", err)
+	}
+	if _, err := gr.GetNodeByKey(node.Key); err == nil {
+		t.Errorf("Expected error getting removed node")
 	}
 }
 
-func TestUpdateGraphNodesEdges(t *testing.T) {
-	node := graph.MakeNode(5)
-	edge := graph.MakeEdge(7, 5, 5)
-
+func TestAddGetRemoveEdge(t *testing.T) {
 	gr := graph.MakeGraph()
-
-	gr.UpdateGraph(graph.WithGraphNodes([]*graph.Node{node}))
-	if len(gr.Nodes) != 1 || gr.Nodes[0].Key != 5 {
-		t.Errorf("expected 1 node with key 5, got %v", gr.Nodes)
+	src := graph.MakeNode(1)
+	dst := graph.MakeNode(2)
+	gr.AddNode(src)
+	gr.AddNode(dst)
+	edge := graph.MakeEdge(1, src.Key, dst.Key)
+	if err := gr.AddEdge(edge); err != nil {
+		t.Errorf("Failed to add edge: %v", err)
 	}
+	e, err := gr.GetEdgeByKey(edge.Key)
+	if err != nil || e == nil {
+		t.Errorf("Failed to get edge: %v", err)
+	}
+	if err := gr.RemoveEdgeByKey(edge.Key); err != nil {
+		t.Errorf("Failed to remove edge: %v", err)
+	}
+	if _, err := gr.GetEdgeByKey(edge.Key); err == nil {
+		t.Errorf("Expected error getting removed edge")
+	}
+}
 
-	gr.UpdateGraph(graph.WithGraphEdges([]*graph.Edge{edge}))
-	if len(gr.Edges) != 1 || gr.Edges[0].Key != 7 {
-		t.Errorf("expected 1 edge with key 7, got %v", gr.Edges)
+func TestAddEdgeNoDuplicate(t *testing.T) {
+	gr := graph.MakeGraph(graph.WithGraphMulti(false))
+	src := graph.MakeNode(1)
+	dst := graph.MakeNode(2)
+	gr.AddNode(src)
+	gr.AddNode(dst)
+	edge1 := graph.MakeEdge(1, src.Key, dst.Key)
+	if err := gr.AddEdge(edge1); err != nil {
+		t.Errorf("Failed to add first edge: %v", err)
+	}
+	edge2 := graph.MakeEdge(2, src.Key, dst.Key)
+	if err := gr.AddEdge(edge2); err == nil {
+		t.Errorf("Expected error when adding duplicate edge")
+	}
+}
+
+func TestAddEdgeNodesMustExist(t *testing.T) {
+	gr := graph.MakeGraph()
+	node := graph.MakeNode(1)
+	gr.AddNode(node)
+	edge := graph.MakeEdge(1, node.Key, 2)
+	if err := gr.AddEdge(edge); err == nil {
+		t.Errorf("Expected error when adding edge with non-existing node")
 	}
 }
