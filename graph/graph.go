@@ -260,6 +260,14 @@ func (gr *Graph) RemoveNodeByKey(key TKey) error {
 	}
 
 	delete(gr.Nodes, key)
+
+	for _, edge := range gr.Edges {
+		if edge.Source == key || edge.Destination == key {
+			gr.RemoveEdgeByKey(edge.Key)
+		}
+	}
+
+	gr.RebuildAdjacencyMap()
 	return nil
 }
 
