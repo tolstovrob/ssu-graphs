@@ -143,13 +143,17 @@ type TOptions struct {
 }
 
 type Graph struct {
-	Nodes   []*Node  `json:"nodes"`
-	Edges   []*Edge  `json:"edges"`
-	Options TOptions `json:"options"`
+	Nodes        map[TKey]*Node  `json:"nodes"`
+	Edges        map[TKey]*Edge  `json:"edges"`
+	AdjacencyMap map[TKey][]TKey `json:"adjacencyMap"`
+	Options      TOptions        `json:"options"`
 }
 
 func MakeGraph(options ...Option[Graph]) *Graph {
 	gr := &Graph{}
+	gr.Nodes = make(map[TKey]*Node)
+	gr.Edges = make(map[TKey]*Edge)
+	gr.AdjacencyMap = make(map[TKey][]TKey)
 	for _, opt := range options {
 		opt(gr)
 	}
@@ -162,15 +166,20 @@ func (gr *Graph) UpdateGraph(options ...Option[Graph]) {
 	}
 }
 
-func WithGraphNodes(nodes []*Node) Option[Graph] {
+func WithGraphNodes(nodes map[TKey]*Node) Option[Graph] {
 	return func(gr *Graph) {
 		gr.Nodes = nodes
 	}
 }
 
-func WithGraphEdges(edges []*Edge) Option[Graph] {
+func WithGraphEdges(edges map[TKey]*Edge) Option[Graph] {
 	return func(gr *Graph) {
 		gr.Edges = edges
+	}
+}
+func WithGraphAdjacencyMap(adj map[TKey][]TKey) Option[Graph] {
+	return func(gr *Graph) {
+		gr.AdjacencyMap = adj
 	}
 }
 
@@ -199,76 +208,78 @@ func WithGraphDirected(IsDirected bool) Option[Graph] {
  * adding existing node or connecting nodes with more then one time in multi).
  */
 
-func (gr *Graph) GetNodeByKey(key TKey) *Node {
-	for _, node := range gr.Nodes {
-		if node.Key == key {
-			return node
-		}
+func (gr *Graph) GetNodeByKey(key TKey) (*Node, error) {
+	if gr.Nodes == nil {
+		return nil, ThrowNodesListIsNil()
 	}
 
-	return nil
+	if _, exists := gr.Nodes[key]; !exists {
+		return nil, ThrowNodeWithKeyNotExists(key)
+	}
+
+	return gr.Nodes[key], nil
 }
 
 func (gr *Graph) AddNode(node *Node) error {
-	if gr.GetNodeByKey(node.Key) != nil {
+	if node, _ := gr.GetNodeByKey(node.Key); node != nil {
 		return ThrowNodeWithKeyExists(node.Key)
 	}
 
-	gr.Nodes = append(gr.Nodes, node)
+	gr.Nodes[node.Key] = node
 	return nil
 }
 
 func (gr *Graph) RemoveNodeByKey(key TKey) error {
-	if gr.GetNodeByKey(key) == nil {
-		return ThrowNodeWithKeyNotExists(key)
+	if _, err := gr.GetNodeByKey(key); err != nil {
+		return err
 	}
 
-	gr.Nodes = slices.DeleteFunc(gr.Nodes, func(n *Node) bool {
-		return n.Key == key
-	})
-
+	delete(gr.Nodes, key)
 	return nil
 }
 
-func (gr *Graph) GetEdgeByKey(key TKey) *Edge {
-	for _, edge := range gr.Edges {
-		if edge.Key == key {
-			return edge
-		}
+func (gr *Graph) GetEdgeByKey(key TKey) (*Edge, error) {
+	if gr.Edges == nil {
+		return nil, ThrowEdgesListIsNil()
 	}
 
-	return nil
-}
+	if _, exists := gr.Edges[key]; !exists {
+		return nil, ThrowEdgeWithKeyNotExists(key)
+	}
 
-/*
- * NOW WARNING! User need to check whether graph is directed or not before
- * adding edge.
- */
+	return gr.Edges[key], nil
+}
 
 func (gr *Graph) AddEdge(edge *Edge) error {
-	if gr.GetEdgeByKey(edge.Key) != nil {
+	if edge, _ := gr.GetEdgeByKey(edge.Key); edge != nil {
 		return ThrowEdgeWithKeyExists(edge.Key)
 	}
 
-	if !gr.Options.IsMulti && slices.ContainsFunc(gr.Edges,
-		func(e *Edge) bool {
-			return e.Source == edge.Source && e.Destination == edge.Destination
-		}) {
-		return ThrowSameEdgeNotAllowedInMulti(edge.Source, edge.Destination)
+	if !gr.Options.IsMulti &&
+		slices.Contains(gr.AdjacencyMap[edge.Source], edge.Destination) ||
+		(!gr.Options.IsDirected && slices.Contains(gr.AdjacencyMap[edge.Destination], edge.Source)) {
+		return ThrowSameEdgeNotAllowed(edge.Source, edge.Destination)
 	}
 
-	gr.Edges = append(gr.Edges, edge)
+	if src, _ := gr.GetNodeByKey(edge.Source); src == nil {
+		return ThrowEdgeEndNotExists(edge.Key, edge.Source)
+	}
+
+	if dst, _ := gr.GetNodeByKey(edge.Destination); dst == nil {
+		return ThrowEdgeEndNotExists(edge.Key, edge.Destination)
+	}
+
+	gr.Edges[edge.Key] = edge
+	gr.AdjacencyMap[edge.Source] = append(gr.AdjacencyMap[edge.Source], edge.Destination)
+
 	return nil
 }
 
 func (gr *Graph) RemoveEdgeByKey(key TKey) error {
-	if gr.GetEdgeByKey(key) == nil {
+	if edge, _ := gr.GetEdgeByKey(key); edge == nil {
 		return ThrowEdgeWithKeyNotExists(key)
 	}
 
-	gr.Edges = slices.DeleteFunc(gr.Edges, func(e *Edge) bool {
-		return e.Key == key
-	})
-
+	delete(gr.Edges, key)
 	return nil
 }
