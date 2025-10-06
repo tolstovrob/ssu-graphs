@@ -161,9 +161,33 @@ func MakeGraph(options ...Option[Graph]) *Graph {
 	return gr
 }
 
+func (gr *Graph) RebuildAdjacencyMap() {
+	gr.AdjacencyMap = make(map[TKey][]TKey)
+	for _, edge := range gr.Edges {
+		gr.AdjacencyMap[edge.Source] = append(gr.AdjacencyMap[edge.Source], edge.Destination)
+		if !gr.Options.IsDirected {
+			gr.AdjacencyMap[edge.Destination] = append(gr.AdjacencyMap[edge.Destination], edge.Source)
+		}
+	}
+}
+
+/*
+ * Later in the code, Graph.RebuildAdjacencyMap will be called many times.
+ * It could really affect performance on huge amount of edges, but since
+ * it is just academical example, we will pretend it never happens.
+ *
+ * Anyways, need to fix, so mark this part as WIP!
+ */
+
 func (gr *Graph) UpdateGraph(options ...Option[Graph]) {
+	oldOptions := gr.Options
+
 	for _, opt := range options {
 		opt(gr)
+	}
+
+	if oldOptions.IsDirected != gr.Options.IsDirected {
+		gr.RebuildAdjacencyMap()
 	}
 }
 
@@ -271,8 +295,7 @@ func (gr *Graph) AddEdge(edge *Edge) error {
 	}
 
 	gr.Edges[edge.Key] = edge
-	gr.AdjacencyMap[edge.Source] = append(gr.AdjacencyMap[edge.Source], edge.Destination)
-
+	gr.RebuildAdjacencyMap()
 	return nil
 }
 
@@ -282,6 +305,7 @@ func (gr *Graph) RemoveEdgeByKey(key TKey) error {
 	}
 
 	delete(gr.Edges, key)
+	gr.RebuildAdjacencyMap()
 	return nil
 }
 
