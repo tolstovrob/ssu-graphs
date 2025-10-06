@@ -9,6 +9,7 @@
 package graph
 
 import (
+	"encoding/json"
 	"slices"
 )
 
@@ -282,4 +283,43 @@ func (gr *Graph) RemoveEdgeByKey(key TKey) error {
 
 	delete(gr.Edges, key)
 	return nil
+}
+
+/*
+ * File handling moved to CLI service -- here will be declared just marshalling
+ * and unmarshalling handlers
+ */
+
+func (g *Graph) MarshalJSON() ([]byte, error) {
+	type MarshalGraph Graph
+	return json.Marshal(&struct {
+		*MarshalGraph
+	}{
+		MarshalGraph: (*MarshalGraph)(g),
+	})
+}
+
+func (g *Graph) UnmarshalJSON(data []byte) error {
+	type MarshalGraph Graph
+	aux := &struct {
+		*MarshalGraph
+	}{
+		MarshalGraph: (*MarshalGraph)(g),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return ThrowGraphUnmarshalError()
+	}
+	return nil
+}
+
+func (g *Graph) ToJSON() (string, error) {
+	b, err := json.Marshal(g)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
+func (g *Graph) FromJSON(jsonData string) error {
+	return json.Unmarshal([]byte(jsonData), g)
 }

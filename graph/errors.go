@@ -33,3 +33,7 @@ func ThrowSameEdgeNotAllowed(src, dst TKey) error {
 func ThrowEdgeEndNotExists(key TKey, end TKey) error {
 	return fmt.Errorf("Edge %v has end %v, which is not represented in Nodes", key, end)
 }
+
+func ThrowGraphUnmarshalError() error {
+	return fmt.Errorf("Cannot unmarshal graph. Seems like this is a internal error")
+}
