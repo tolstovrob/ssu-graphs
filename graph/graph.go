@@ -322,36 +322,37 @@ func (gr *Graph) RemoveEdgeByKey(key TKey) error {
  * and unmarshalling handlers
  */
 
-func (g *Graph) MarshalJSON() ([]byte, error) {
+func (gr *Graph) MarshalJSON() ([]byte, error) {
 	type MarshalGraph Graph
 	return json.Marshal(&struct {
 		*MarshalGraph
 	}{
-		MarshalGraph: (*MarshalGraph)(g),
+		MarshalGraph: (*MarshalGraph)(gr),
 	})
 }
 
-func (g *Graph) UnmarshalJSON(data []byte) error {
+func (gr *Graph) UnmarshalJSON(data []byte) error {
 	type MarshalGraph Graph
 	aux := &struct {
 		*MarshalGraph
 	}{
-		MarshalGraph: (*MarshalGraph)(g),
+		MarshalGraph: (*MarshalGraph)(gr),
 	}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return ThrowGraphUnmarshalError()
 	}
+	gr.RebuildAdjacencyMap()
 	return nil
 }
 
-func (g *Graph) ToJSON() (string, error) {
-	b, err := json.Marshal(g)
+func (gr *Graph) ToJSON() (string, error) {
+	b, err := json.Marshal(gr)
 	if err != nil {
 		return "", err
 	}
 	return string(b), nil
 }
 
-func (g *Graph) FromJSON(jsonData string) error {
-	return json.Unmarshal([]byte(jsonData), g)
+func (gr *Graph) FromJSON(jsonData string) error {
+	return json.Unmarshal([]byte(jsonData), gr)
 }
