@@ -42,17 +42,14 @@ func (cli *CLIService) Run() error {
 func (cli *CLIService) setupUI() {
 	cli.pages = tview.NewPages()
 
-	// Главное меню
 	mainMenu := cli.createMainMenu()
 	cli.pages.AddPage("main", mainMenu, true, true)
 
-	// Статус бар
 	cli.statusView = tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter)
 	cli.statusView.SetBackgroundColor(tview.Styles.PrimitiveBackgroundColor)
 
-	// Текущее представление графа с возможностью скролла
 	cli.currentView = tview.NewTextView().
 		SetDynamicColors(true).
 		SetScrollable(true).
@@ -61,7 +58,6 @@ func (cli *CLIService) setupUI() {
 		})
 	cli.currentView.SetTitle(" Current Graph State ").SetBorder(true)
 
-	// Основной layout
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(cli.statusView, 1, 0, false).
@@ -135,7 +131,6 @@ func (cli *CLIService) showEdgeOperations() {
 func (cli *CLIService) showGraphOptions() {
 	form := tview.NewForm()
 
-	// Добавляем чекбоксы с текущими значениями
 	form.AddCheckbox("Directed Graph", cli.graph.Options.IsDirected, func(checked bool) {
 		cli.graph.UpdateGraph(graph.WithGraphDirected(checked))
 	})
@@ -181,7 +176,6 @@ func (cli *CLIService) showJSONOperations() {
 	cli.pages.AddAndSwitchToPage("json_operations", modal, true)
 }
 
-// Node Operations
 func (cli *CLIService) showAddNodeForm() {
 	form := tview.NewForm()
 	var key, label string
@@ -295,7 +289,6 @@ func (cli *CLIService) showNodesList() {
 	cli.showScrollableModal("Nodes List", nodesInfo, "node_operations")
 }
 
-// Edge Operations
 func (cli *CLIService) showAddEdgeForm() {
 	form := tview.NewForm()
 	var edgeKey, srcKey, dstKey, weightStr, label string
@@ -455,7 +448,6 @@ func (cli *CLIService) showEdgesList() {
 	cli.showScrollableModal("Edges List", edgesInfo, "edge_operations")
 }
 
-// JSON Operations
 func (cli *CLIService) showSaveJSONForm() {
 	form := tview.NewForm()
 	var filename string
@@ -537,8 +529,7 @@ func (cli *CLIService) showJSONView() {
 		return
 	}
 
-	// Форматируем JSON для лучшего отображения
-	var formattedJSON map[string]interface{}
+	var formattedJSON map[string]any
 	if err := json.Unmarshal([]byte(jsonData), &formattedJSON); err != nil {
 		cli.updateStatus(fmt.Sprintf("Error formatting JSON: %v", err))
 		return
@@ -550,7 +541,6 @@ func (cli *CLIService) showJSONView() {
 		return
 	}
 
-	// Создаем текстовое view с возможностью скролла
 	textView := tview.NewTextView().
 		SetDynamicColors(true).
 		SetScrollable(true).
@@ -561,36 +551,21 @@ func (cli *CLIService) showJSONView() {
 
 	textView.SetBorder(true).SetTitle(" Graph JSON - Use arrow keys to scroll, Q to go back ")
 
-	// Добавляем кнопки навигации
-	buttons := tview.NewFlex().
-		SetDirection(tview.FlexColumn).
-		AddItem(tview.NewButton("Scroll Up").SetSelectedFunc(func() {
-			row, col := textView.GetScrollOffset()
-			textView.ScrollTo(row-5, col)
-		}), 0, 1, false).
-		AddItem(tview.NewButton("Scroll Down").SetSelectedFunc(func() {
-			row, col := textView.GetScrollOffset()
-			textView.ScrollTo(row+5, col)
-		}), 0, 1, false).
-		AddItem(tview.NewButton("Top").SetSelectedFunc(func() {
-			textView.ScrollToBeginning()
-		}), 0, 1, false).
-		AddItem(tview.NewButton("Bottom").SetSelectedFunc(func() {
-			textView.ScrollToEnd()
-		}), 0, 1, false).
-		AddItem(tview.NewButton("Back (Q)").SetSelectedFunc(func() {
-			cli.pages.SwitchToPage("json_operations")
-		}), 0, 1, false)
-
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(textView, 0, 1, true).
-		AddItem(buttons, 1, 0, false)
+		AddItem(textView, 0, 1, true)
+
+	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Rune() == 'q' || event.Rune() == 'Q' {
+			cli.pages.SwitchToPage("json_operations")
+			return nil
+		}
+		return event
+	})
 
 	cli.pages.AddAndSwitchToPage("json_view", flex, true)
 }
 
-// Универсальный метод для создания скроллируемых модальных окон с поддержкой клавиши Q
 func (cli *CLIService) showScrollableModal(title, content, returnPage string) {
 	textView := tview.NewTextView().
 		SetDynamicColors(true).
@@ -600,35 +575,12 @@ func (cli *CLIService) showScrollableModal(title, content, returnPage string) {
 		}).
 		SetText(content)
 
-	textView.SetBorder(true).SetTitle(fmt.Sprintf(" %s - Use arrow keys to scroll, Q to go back ", title))
-
-	// Добавляем кнопки навигации
-	buttons := tview.NewFlex().
-		SetDirection(tview.FlexColumn).
-		AddItem(tview.NewButton("Scroll Up").SetSelectedFunc(func() {
-			row, col := textView.GetScrollOffset()
-			textView.ScrollTo(row-5, col)
-		}), 0, 1, false).
-		AddItem(tview.NewButton("Scroll Down").SetSelectedFunc(func() {
-			row, col := textView.GetScrollOffset()
-			textView.ScrollTo(row+5, col)
-		}), 0, 1, false).
-		AddItem(tview.NewButton("Top").SetSelectedFunc(func() {
-			textView.ScrollToBeginning()
-		}), 0, 1, false).
-		AddItem(tview.NewButton("Bottom").SetSelectedFunc(func() {
-			textView.ScrollToEnd()
-		}), 0, 1, false).
-		AddItem(tview.NewButton("Back (Q)").SetSelectedFunc(func() {
-			cli.pages.SwitchToPage(returnPage)
-		}), 0, 1, false)
+	textView.SetBorder(true).SetTitle(fmt.Sprintf(" %s - Use keys to scroll, Q to go back ", title))
 
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(textView, 0, 1, true).
-		AddItem(buttons, 1, 0, false)
+		AddItem(textView, 0, 1, true)
 
-	// Обработка клавиши Q для всего flex контейнера
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == 'q' || event.Rune() == 'Q' {
 			cli.pages.SwitchToPage(returnPage)
@@ -640,11 +592,9 @@ func (cli *CLIService) showScrollableModal(title, content, returnPage string) {
 	cli.pages.AddAndSwitchToPage(strings.ToLower(strings.ReplaceAll(title, " ", "_"))+"_view", flex, true)
 }
 
-// Детальное представление графа с полной информацией
 func (cli *CLIService) getDetailedGraphInfo() string {
 	var info strings.Builder
 
-	// 1. ОПЦИИ ГРАФА (в начале)
 	info.WriteString("GRAPH OPTIONS\n")
 	info.WriteString(strings.Repeat("─", 50) + "\n")
 	info.WriteString(fmt.Sprintf("Directed: %v\n", cli.graph.Options.IsDirected))
@@ -653,14 +603,12 @@ func (cli *CLIService) getDetailedGraphInfo() string {
 		map[bool]string{true: "Directed", false: "Undirected"}[cli.graph.Options.IsDirected],
 		map[bool]string{true: " Multi", false: ""}[cli.graph.Options.IsMulti]))
 
-	// 2. ОСНОВНАЯ СТАТИСТИКА
 	info.WriteString("BASIC STATISTICS\n")
 	info.WriteString(strings.Repeat("─", 50) + "\n")
 	info.WriteString(fmt.Sprintf("Total Nodes: %d\n", len(cli.graph.Nodes)))
 	info.WriteString(fmt.Sprintf("Total Edges: %d\n", len(cli.graph.Edges)))
 	info.WriteString(fmt.Sprintf("Density: %.4f\n\n", cli.calculateGraphDensity()))
 
-	// 3. СТАТИСТИКА ПО СТЕПЕНЯМ ВЕРШИН
 	degreeDistribution := make(map[int]int)
 	maxDegree := 0
 	minDegree := -1
@@ -694,7 +642,6 @@ func (cli *CLIService) getDetailedGraphInfo() string {
 	info.WriteString(fmt.Sprintf("Average degree: %.2f\n", avgDegree))
 	info.WriteString(fmt.Sprintf("Isolated nodes: %d\n", isolatedNodes))
 
-	// Распределение степеней
 	info.WriteString("\nDegree Distribution:\n")
 	degrees := make([]int, 0, len(degreeDistribution))
 	for degree := range degreeDistribution {
@@ -709,13 +656,11 @@ func (cli *CLIService) getDetailedGraphInfo() string {
 	}
 	info.WriteString("\n")
 
-	// 4. ПОЛНЫЙ СПИСОК УЗЛОВ
-	info.WriteString("COMPLETE NODES LIST\n")
+	info.WriteString("NODES LIST\n")
 	info.WriteString(strings.Repeat("─", 50) + "\n")
 	if len(cli.graph.Nodes) == 0 {
 		info.WriteString("No nodes in graph\n")
 	} else {
-		// Сортируем узлы по ключу
 		keys := make([]graph.TKey, 0, len(cli.graph.Nodes))
 		for key := range cli.graph.Nodes {
 			keys = append(keys, key)
@@ -731,13 +676,11 @@ func (cli *CLIService) getDetailedGraphInfo() string {
 	}
 	info.WriteString("\n")
 
-	// 5. ПОЛНЫЙ СПИСОК РЕБЕР
-	info.WriteString("COMPLETE EDGES LIST\n")
+	info.WriteString("EDGES LIST\n")
 	info.WriteString(strings.Repeat("─", 50) + "\n")
 	if len(cli.graph.Edges) == 0 {
 		info.WriteString("No edges in graph\n")
 	} else {
-		// Сортируем ребра по ключу
 		keys := make([]graph.TKey, 0, len(cli.graph.Edges))
 		for key := range cli.graph.Edges {
 			keys = append(keys, key)
@@ -752,13 +695,11 @@ func (cli *CLIService) getDetailedGraphInfo() string {
 	}
 	info.WriteString("\n")
 
-	// 6. ПОЛНЫЙ ADJACENCY LIST
-	info.WriteString("COMPLETE ADJACENCY LIST\n")
+	info.WriteString("ADJACENCY LIST\n")
 	info.WriteString(strings.Repeat("─", 50) + "\n")
 	if len(cli.graph.AdjacencyMap) == 0 {
 		info.WriteString("Empty adjacency list\n")
 	} else {
-		// Сортируем узлы adjacency list по ключу
 		keys := make([]graph.TKey, 0, len(cli.graph.AdjacencyMap))
 		for key := range cli.graph.AdjacencyMap {
 			keys = append(keys, key)
@@ -769,7 +710,6 @@ func (cli *CLIService) getDetailedGraphInfo() string {
 			neighbors := cli.graph.AdjacencyMap[key]
 			info.WriteString(fmt.Sprintf("%4d → [", key))
 
-			// Сортируем соседей
 			sort.Slice(neighbors, func(i, j int) bool { return neighbors[i] < neighbors[j] })
 
 			for i, neighbor := range neighbors {
@@ -785,7 +725,6 @@ func (cli *CLIService) getDetailedGraphInfo() string {
 	return info.String()
 }
 
-// Вспомогательные методы для статистики
 func (cli *CLIService) calculateGraphDensity() float64 {
 	n := len(cli.graph.Nodes)
 	if n <= 1 {
@@ -804,7 +743,6 @@ func (cli *CLIService) calculateGraphDensity() float64 {
 	return float64(len(cli.graph.Edges)) / float64(maxEdges)
 }
 
-// Вспомогательные методы
 func (cli *CLIService) updateStatus(message string) {
 	cli.statusView.SetText(fmt.Sprintf("[green]%s", message))
 }
