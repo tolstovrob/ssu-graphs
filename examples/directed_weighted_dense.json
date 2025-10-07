@@ -1,0 +1,149 @@
+{
+  "nodes": {
+    "1": {
+      "key": 1,
+      "label": "Node_1"
+    },
+    "2": {
+      "key": 2,
+      "label": "Node_2"
+    },
+    "3": {
+      "key": 3,
+      "label": "Node_3"
+    },
+    "4": {
+      "key": 4,
+      "label": "Node_4"
+    },
+    "5": {
+      "key": 5,
+      "label": "Node_5"
+    },
+    "6": {
+      "key": 6,
+      "label": "Node_6"
+    },
+    "7": {
+      "key": 7,
+      "label": "Isolated_Node_7"
+    }
+  },
+  "edges": {
+    "1": {
+      "key": 1,
+      "source": 1,
+      "destination": 2,
+      "weight": 10,
+      "label": "Edge_1_2"
+    },
+    "2": {
+      "key": 2,
+      "source": 2,
+      "destination": 3,
+      "weight": 2,
+      "label": "Edge_2_3"
+    },
+    "3": {
+      "key": 3,
+      "source": 3,
+      "destination": 4,
+      "weight": 2,
+      "label": "Edge_3_4"
+    },
+    "4": {
+      "key": 4,
+      "source": 4,
+      "destination": 5,
+      "weight": 7,
+      "label": "Edge_4_5"
+    },
+    "5": {
+      "key": 5,
+      "source": 5,
+      "destination": 6,
+      "weight": 7,
+      "label": "Edge_5_6"
+    },
+    "6": {
+      "key": 6,
+      "source": 6,
+      "destination": 3,
+      "weight": 9,
+      "label": "Edge_6_3"
+    },
+    "7": {
+      "key": 7,
+      "source": 4,
+      "destination": 3,
+      "weight": 10,
+      "label": "Edge_4_3"
+    },
+    "8": {
+      "key": 8,
+      "source": 6,
+      "destination": 6,
+      "weight": 8,
+      "label": "Loop_6"
+    },
+    "9": {
+      "key": 9,
+      "source": 1,
+      "destination": 1,
+      "weight": 10,
+      "label": "Loop_1"
+    },
+    "10": {
+      "key": 10,
+      "source": 4,
+      "destination": 2,
+      "weight": 9,
+      "label": "Extra_Edge_4_2"
+    },
+    "11": {
+      "key": 11,
+      "source": 3,
+      "destination": 6,
+      "weight": 1,
+      "label": "Extra_Edge_3_6"
+    },
+    "12": {
+      "key": 12,
+      "source": 4,
+      "destination": 5,
+      "weight": 1,
+      "label": "Extra_Edge_4_5"
+    }
+  },
+  "adjacencyMap": {
+    "1": [
+      2,
+      1
+    ],
+    "2": [
+      3
+    ],
+    "3": [
+      4,
+      6
+    ],
+    "4": [
+      5,
+      3,
+      2,
+      5
+    ],
+    "5": [
+      6
+    ],
+    "6": [
+      3,
+      6
+    ],
+    "7": []
+  },
+  "options": {
+    "isMulti": false,
+    "IsDirected": true
+  }
+}
