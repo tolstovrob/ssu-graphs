@@ -190,8 +190,8 @@ func (gr *Graph) AddEdge(edge *Edge) error {
 	}
 
 	if !gr.Options.IsMulti &&
-		slices.Contains(gr.AdjacencyMap[edge.Source], edge.Destination) ||
-		(!gr.Options.IsDirected && slices.Contains(gr.AdjacencyMap[edge.Destination], edge.Source)) {
+		(slices.Contains(gr.AdjacencyMap[edge.Source], edge.Destination) ||
+			!gr.Options.IsDirected && slices.Contains(gr.AdjacencyMap[edge.Destination], edge.Source)) {
 		return ThrowSameEdgeNotAllowed(edge.Source, edge.Destination)
 	}
 
