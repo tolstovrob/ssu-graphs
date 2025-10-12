@@ -75,7 +75,7 @@ func (cli *CLIService) showAddEdgeForm() {
 		}
 
 		weight, err := strconv.ParseUint(weightStr, 10, 64)
-		if err != nil {
+		if weightStr != "" && err != nil {
 			cli.updateStatus("Error: Invalid weight format", Error)
 			return
 		}
