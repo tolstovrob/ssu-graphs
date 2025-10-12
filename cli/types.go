@@ -32,7 +32,7 @@ type CLIService struct {
 type Status int
 
 const (
-	Ok Status = iota
+	Default Status = iota
 	Error
 	Success
 )
@@ -43,7 +43,7 @@ const (
  */
 
 var statusColor = map[Status]string{
-	Ok:      "white",
+	Default: "white",
 	Error:   "red",
 	Success: "green",
 }

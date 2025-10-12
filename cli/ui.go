@@ -39,7 +39,7 @@ func (cli *CLIService) setupUI() {
 		AddItem(cli.statusView, 3, 0, false)
 
 	cli.app.SetRoot(flex, true)
-	cli.updateStatus("Ready", Ok)
+	cli.updateStatus("Ready. Use arrows or 1-5 to navigate, q to exit", Default)
 }
 
 func (cli *CLIService) createMainMenu() tview.Primitive {
