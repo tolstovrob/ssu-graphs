@@ -34,6 +34,7 @@ type Status int
 const (
 	Ok Status = iota
 	Error
+	Success
 )
 
 /*
@@ -42,6 +43,7 @@ const (
  */
 
 var statusColor = map[Status]string{
-	Ok:    "white",
-	Error: "red",
+	Ok:      "white",
+	Error:   "red",
+	Success: "green",
 }

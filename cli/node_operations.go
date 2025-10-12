@@ -61,7 +61,7 @@ func (cli *CLIService) showAddNodeForm() {
 		if err := cli.graph.AddNode(node); err != nil {
 			cli.updateStatus(fmt.Sprintf("Error: %v", err), Error)
 		} else {
-			cli.updateStatus(fmt.Sprintf("Node %d added successfully", keyVal), Error)
+			cli.updateStatus(fmt.Sprintf("Node %d added successfully", keyVal), Success)
 			cli.pages.SwitchToPage("main")
 		}
 	})
@@ -90,7 +90,7 @@ func (cli *CLIService) showRemoveNodeForm() {
 		if err := cli.graph.RemoveNodeByKey(graph.TKey(keyVal)); err != nil {
 			cli.updateStatus(fmt.Sprintf("Error: %v", err), Error)
 		} else {
-			cli.updateStatus(fmt.Sprintf("Node %d removed successfully", keyVal), Error)
+			cli.updateStatus(fmt.Sprintf("Node %d removed successfully", keyVal), Success)
 			cli.pages.SwitchToPage("main")
 		}
 	})
@@ -126,7 +126,7 @@ func (cli *CLIService) showModifyNodeForm() {
 		}
 
 		node.UpdateNode(graph.WithNodeLabel(newLabel))
-		cli.updateStatus(fmt.Sprintf("Node %d modified successfully", keyVal), Error)
+		cli.updateStatus(fmt.Sprintf("Node %d modified successfully", keyVal), Success)
 		cli.pages.SwitchToPage("main")
 	})
 	form.AddButton("Cancel", func() {

@@ -91,7 +91,7 @@ func (cli *CLIService) showAddEdgeForm() {
 		if err := cli.graph.AddEdge(edge); err != nil {
 			cli.updateStatus(fmt.Sprintf("Error: %v", err), Error)
 		} else {
-			cli.updateStatus(fmt.Sprintf("Edge %d added successfully", key), Error)
+			cli.updateStatus(fmt.Sprintf("Edge %d added successfully", key), Success)
 			cli.pages.SwitchToPage("main")
 		}
 	})
@@ -120,7 +120,7 @@ func (cli *CLIService) showRemoveEdgeForm() {
 		if err := cli.graph.RemoveEdgeByKey(graph.TKey(keyVal)); err != nil {
 			cli.updateStatus(fmt.Sprintf("Error: %v", err), Error)
 		} else {
-			cli.updateStatus(fmt.Sprintf("Edge %d removed successfully", keyVal), Error)
+			cli.updateStatus(fmt.Sprintf("Edge %d removed successfully", keyVal), Success)
 			cli.pages.SwitchToPage("main")
 		}
 	})
@@ -171,7 +171,7 @@ func (cli *CLIService) showModifyEdgeForm() {
 			edge.UpdateEdge(graph.WithEdgeLabel(label))
 		}
 
-		cli.updateStatus(fmt.Sprintf("Edge %d modified successfully", keyVal), Error)
+		cli.updateStatus(fmt.Sprintf("Edge %d modified successfully", keyVal), Success)
 		cli.pages.SwitchToPage("main")
 	})
 	form.AddButton("Cancel", func() {

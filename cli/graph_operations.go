@@ -30,7 +30,7 @@ func (cli *CLIService) showGraphOptions() {
 	})
 
 	form.AddButton("Save", func() {
-		cli.updateStatus("Graph options updated", Error)
+		cli.updateStatus("Graph options updated", Success)
 		cli.pages.SwitchToPage("main")
 	})
 	form.AddButton("Back", func() {
@@ -223,7 +223,7 @@ func (cli *CLIService) showSaveJSONForm() {
 			return
 		}
 
-		cli.updateStatus(fmt.Sprintf("Graph saved to %s successfully", filename), Error)
+		cli.updateStatus(fmt.Sprintf("Graph saved to %s successfully", filename), Success)
 		cli.pages.SwitchToPage("main")
 	})
 	form.AddButton("Cancel", func() {
@@ -260,7 +260,7 @@ func (cli *CLIService) showLoadJSONForm() {
 		}
 
 		cli.graph = newGraph
-		cli.updateStatus(fmt.Sprintf("Graph loaded from %s successfully", filename), Error)
+		cli.updateStatus(fmt.Sprintf("Graph loaded from %s successfully", filename), Success)
 		cli.pages.SwitchToPage("main")
 	})
 	form.AddButton("Cancel", func() {
