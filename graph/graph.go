@@ -10,6 +10,7 @@ package graph
 
 import (
 	"encoding/json"
+	"fmt"
 	"slices"
 )
 
@@ -62,6 +63,61 @@ func MakeGraph(options ...Option[Graph]) *Graph {
 	return gr
 }
 
+func (gr *Graph) RebuildEdges() {
+	newEdges := make(map[TKey]*Edge)
+	edgeKeysUsed := make(map[TKey]bool)
+	edgeKeyCounter := TKey(1)
+
+	nextEdgeKey := func() TKey {
+		for {
+			if !edgeKeysUsed[edgeKeyCounter] {
+				edgeKeysUsed[edgeKeyCounter] = true
+				key := edgeKeyCounter
+				edgeKeyCounter++
+				return key
+			}
+			edgeKeyCounter++
+		}
+	}
+
+	edgeID := func(src, dst TKey) string {
+		if !gr.Options.IsDirected && src > dst {
+			src, dst = dst, src
+		}
+		return fmt.Sprintf("%d-%d", src, dst)
+	}
+
+	seenEdges := make(map[string]bool)
+
+	for _, edge := range gr.Edges {
+		id := edgeID(edge.Source, edge.Destination)
+		if !gr.Options.IsMulti {
+			if seenEdges[id] {
+				continue
+			}
+			seenEdges[id] = true
+		}
+
+		key := edge.Key
+		if key == 0 || edgeKeysUsed[key] {
+			key = nextEdgeKey()
+		} else {
+			edgeKeysUsed[key] = true
+		}
+
+		newEdge := &Edge{
+			Key:         key,
+			Source:      edge.Source,
+			Destination: edge.Destination,
+			Weight:      edge.Weight,
+			Label:       edge.Label,
+		}
+		newEdges[key] = newEdge
+	}
+
+	gr.Edges = newEdges
+}
+
 func (gr *Graph) RebuildAdjacencyMap() {
 	gr.AdjacencyMap = make(map[TKey][]TKey)
 	for _, edge := range gr.Edges {
@@ -87,7 +143,8 @@ func (gr *Graph) UpdateGraph(options ...Option[Graph]) {
 		opt(gr)
 	}
 
-	if oldOptions.IsDirected != gr.Options.IsDirected {
+	if oldOptions != gr.Options {
+		gr.RebuildEdges()
 		gr.RebuildAdjacencyMap()
 	}
 }
