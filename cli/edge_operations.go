@@ -49,7 +49,7 @@ func (cli *CLIService) showAddEdgeForm() {
 	form.AddInputField("Destination Node Key", "", 10, nil, func(text string) {
 		dstKey = text
 	})
-	form.AddInputField("Weight", "0", 10, nil, func(text string) {
+	form.AddInputField("Weight", "", 10, nil, func(text string) {
 		weightStr = text
 	})
 	form.AddInputField("Label", "", 20, nil, func(text string) {

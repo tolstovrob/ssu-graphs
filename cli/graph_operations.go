@@ -77,57 +77,10 @@ func (cli *CLIService) getDetailedGraphInfo() string {
 		map[bool]string{true: "Directed", false: "Undirected"}[cli.graph.Options.IsDirected],
 		map[bool]string{true: " Multi", false: ""}[cli.graph.Options.IsMulti]))
 
-	info.WriteString("BASIC STATISTICS\n")
+	info.WriteString("STATISTICS\n")
 	info.WriteString(strings.Repeat("─", 50) + "\n")
 	info.WriteString(fmt.Sprintf("Total Nodes: %d\n", len(cli.graph.Nodes)))
-	info.WriteString(fmt.Sprintf("Total Edges: %d\n", len(cli.graph.Edges)))
-
-	degreeDistribution := make(map[int]int)
-	maxDegree := 0
-	minDegree := -1
-	totalDegree := 0
-	isolatedNodes := 0
-
-	for _, neighbors := range cli.graph.AdjacencyMap {
-		degree := len(neighbors)
-		degreeDistribution[degree]++
-		totalDegree += degree
-		if degree > maxDegree {
-			maxDegree = degree
-		}
-		if minDegree == -1 || degree < minDegree {
-			minDegree = degree
-		}
-		if degree == 0 {
-			isolatedNodes++
-		}
-	}
-
-	avgDegree := 0.0
-	if len(cli.graph.AdjacencyMap) > 0 {
-		avgDegree = float64(totalDegree) / float64(len(cli.graph.AdjacencyMap))
-	}
-
-	info.WriteString("DEGREE STATISTICS\n")
-	info.WriteString(strings.Repeat("─", 50) + "\n")
-	info.WriteString(fmt.Sprintf("Minimum degree: %d\n", minDegree))
-	info.WriteString(fmt.Sprintf("Maximum degree: %d\n", maxDegree))
-	info.WriteString(fmt.Sprintf("Average degree: %.2f\n", avgDegree))
-	info.WriteString(fmt.Sprintf("Isolated nodes: %d\n", isolatedNodes))
-
-	info.WriteString("\nDegree Distribution:\n")
-	degrees := make([]int, 0, len(degreeDistribution))
-	for degree := range degreeDistribution {
-		degrees = append(degrees, degree)
-	}
-	sort.Ints(degrees)
-
-	for _, degree := range degrees {
-		count := degreeDistribution[degree]
-		percentage := float64(count) / float64(len(cli.graph.Nodes)) * 100
-		info.WriteString(fmt.Sprintf("  Degree %d: %d nodes (%.1f%%)\n", degree, count, percentage))
-	}
-	info.WriteString("\n")
+	info.WriteString(fmt.Sprintf("Total Edges: %d\n\n", len(cli.graph.Edges)))
 
 	info.WriteString("NODES LIST\n")
 	info.WriteString(strings.Repeat("─", 50) + "\n")
