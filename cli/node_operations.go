@@ -36,6 +36,7 @@ func (cli *CLIService) showNodeOperations() {
 
 	cli.pages.AddAndSwitchToPage("node_operations", modal, true)
 }
+
 func (cli *CLIService) showAddNodeForm() {
 	form := tview.NewForm()
 	var key, label string

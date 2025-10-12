@@ -49,6 +49,7 @@ func (cli *CLIService) createMainMenu() tview.Primitive {
 		AddItem("Graph Options", "Configure graph properties", '3', cli.showGraphOptions).
 		AddItem("View Graph Info", "Display graph information", '4', cli.showGraphInfo).
 		AddItem("JSON Operations", "Save/Load graph from JSON", '5', cli.showJSONOperations).
+		AddItem("Algorithms", "Tasks from my SSU course", '6', cli.showAlgorithmsMenu).
 		AddItem("Quit", "Exit application", 'q', func() {
 			cli.app.Stop()
 		})
