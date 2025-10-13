@@ -37,3 +37,7 @@ func ThrowEdgeEndNotExists(key TKey, end TKey) error {
 func ThrowGraphUnmarshalError() error {
 	return fmt.Errorf("Cannot unmarshal graph. Seems like this is a internal error")
 }
+
+func ThrowGraphNotDirected() error {
+	return fmt.Errorf("Graph is not directed, but have to be")
+}
