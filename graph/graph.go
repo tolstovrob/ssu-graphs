@@ -63,6 +63,33 @@ func MakeGraph(options ...Option[Graph]) *Graph {
 	return gr
 }
 
+func (gr *Graph) Copy() *Graph {
+	newGraph := MakeGraph(
+		WithGraphDirected(gr.Options.IsDirected),
+		WithGraphMulti(gr.Options.IsMulti),
+	)
+
+	for key, node := range gr.Nodes {
+		newGraph.Nodes[key] = &Node{
+			Key:   node.Key,
+			Label: node.Label,
+		}
+	}
+
+	for key, edge := range gr.Edges {
+		newGraph.Edges[key] = &Edge{
+			Key:         edge.Key,
+			Source:      edge.Source,
+			Destination: edge.Destination,
+			Weight:      edge.Weight,
+			Label:       edge.Label,
+		}
+	}
+
+	newGraph.RebuildAdjacencyMap()
+	return newGraph
+}
+
 func (gr *Graph) RebuildEdges() {
 	newEdges := make(map[TKey]*Edge)
 	edgeKeysUsed := make(map[TKey]bool)
