@@ -20,6 +20,7 @@ func (cli *CLIService) showAlgorithmsMenu() {
 	list := tview.NewList().
 		AddItem("In-Degree less than", "Find nodes with in-degree less than target", '1', cli.showInDegreeLessThanForm).
 		AddItem("In-nodes in directed", "Find nodes, that are in-nodes for target in directed graph", '2', cli.showIncomingNeighborsForm).
+		AddItem("Remove pendant", "Remove all pendant nodes. Destructive action", '3', cli.showRemovePendantVertices).
 		AddItem("Back to Main Menu", "Return to main menu", 'q', func() {
 			cli.pages.SwitchToPage("main")
 		})
@@ -131,4 +132,54 @@ func (cli *CLIService) showIncomingNeighborsForm() {
 
 	form.SetBorder(true).SetTitle(" Find Incoming Neighbors ")
 	cli.pages.AddAndSwitchToPage("incoming_neighbors", form, true)
+}
+
+func (cli *CLIService) showRemovePendantVertices() {
+	modal := tview.NewModal().
+		SetText("This will create a new graph without pendant vertices (degree 1).\n\nOriginal graph will be replaced. Continue?").
+		AddButtons([]string{"Yes, Remove Pendant Vertices", "Cancel"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			switch buttonLabel {
+			case "Yes, Remove Pendant Vertices":
+				cli.executeRemovePendantVertices()
+			case "Cancel":
+				cli.pages.SwitchToPage("algorithms_menu")
+			}
+		})
+
+	cli.pages.AddAndSwitchToPage("remove_pendant_confirm", modal, true)
+}
+
+func (cli *CLIService) executeRemovePendantVertices() {
+	newGraph, err := algo.RemovePendantVertices(cli.graph)
+
+	if err != nil {
+		cli.updateStatus(fmt.Sprintf("Error: %v", err), Error)
+		cli.pages.SwitchToPage("algorithms_menu")
+		return
+	}
+
+	originalNodes := len(cli.graph.Nodes)
+	originalEdges := len(cli.graph.Edges)
+
+	cli.graph = newGraph
+
+	newNodes := len(cli.graph.Nodes)
+	newEdges := len(cli.graph.Edges)
+	removedNodes := originalNodes - newNodes
+	removedEdges := originalEdges - newEdges
+
+	resultText := "Pendant Vertices Removal Results:\n\n"
+	resultText += fmt.Sprintf("Original graph: %d nodes, %d edges\n", originalNodes, originalEdges)
+	resultText += fmt.Sprintf("New graph:      %d nodes, %d edges\n\n", newNodes, newEdges)
+	resultText += fmt.Sprintf("Removed:        %d nodes, %d edges\n\n", removedNodes, removedEdges)
+
+	if removedNodes == 0 {
+		resultText += "No pendant vertices found in the graph."
+	} else {
+		resultText += "Graph successfully updated without pendant vertices."
+	}
+
+	cli.showScrollableModal("Pendant Vertices Removal", resultText, "algorithms_menu")
+	cli.updateStatus(fmt.Sprintf("Removed %d pendant vertices", removedNodes), Success)
 }
