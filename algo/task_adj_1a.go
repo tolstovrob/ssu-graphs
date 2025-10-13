@@ -7,7 +7,7 @@ package algo
 import "github.com/tolstovrob/graph-go/graph"
 
 /*
- * Task: Get all nodes, for which degree is greater then half-degree of entry
+ * Task 1: Get all nodes, for which degree is greater then half-degree of entry
  */
 
 func InDegreeLessThan(gr *graph.Graph, targetKey graph.TKey) []graph.TKey {
@@ -28,6 +28,25 @@ func InDegreeLessThan(gr *graph.Graph, targetKey graph.TKey) []graph.TKey {
 			result = append(result, nodeKey)
 		}
 	}
-
 	return result
+}
+
+/*
+ * Task 2: For directed graph node output all in-nodes
+ */
+
+func InNodesInDirected(gr *graph.Graph, targetKey graph.TKey) ([]graph.TKey, error) {
+	// Check if graph is directed
+	if !gr.Options.IsDirected {
+		return nil, graph.ThrowGraphNotDirected()
+	}
+
+	// If graph directed, find all entries
+	inNodes := []graph.TKey{}
+	for _, edge := range gr.Edges {
+		if edge.Destination == targetKey {
+			inNodes = append(inNodes, edge.Source)
+		}
+	}
+	return inNodes, nil
 }
